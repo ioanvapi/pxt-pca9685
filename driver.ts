@@ -391,7 +391,7 @@ namespace PCA9685 {
      * @param degrees The degrees (0-180) to move the servo to
      */
     //% block
-    export function setServoPositionSlow(servoNum: ServoNum = 1, degrees: number, chipAddress: number = 0x40): void {
+    export function setServoPositionSlowly(servoNum: ServoNum = 1, degrees: number, chipAddress: number = 0x40): void {
         const chip = getChipConfig(chipAddress)
         servoNum = Math.max(1, Math.min(16, servoNum))
         degrees = Math.max(0, Math.min(180, degrees))
@@ -410,16 +410,35 @@ namespace PCA9685 {
         for (let i = center; i > 0; i--) {
             values.push(diff > 0 ? i : -i)
         }
+        let sum = sumArray(values)
+        for (let i = 0; i < Math.abs(diff-sum); i++) {
+            values[i] = diff > 0 ? values[i]++ : values[i]--
+        }
+
 
         for (let idx in values) {
             let newDegrees: number = servo.position + values[idx]
             const pwm = degrees180ToPWM(chip.freq, newDegrees, servo.minOffset, servo.maxOffset)
+            debug(`setServoPositionSlowly(${servoNum}, ${newDegrees}, ${chipAddress})`)
             setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress)
         }
 
         const pwm = degrees180ToPWM(chip.freq, degrees, servo.minOffset, servo.maxOffset)
         servo.position = degrees
+        debug(`setServoPositionSlowly(${servoNum}, ${degrees}, ${chipAddress})`)
+        servo.debug()
+
         return setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress)
+    }
+
+
+    function sumArray(list: number[]):number {
+        let sum = 0
+        for(let idx in list) {
+            sum += list[idx];
+        }
+
+        return sum
     }
 
     /**
