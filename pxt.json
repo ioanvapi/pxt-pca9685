@@ -1,6 +1,6 @@
 {
     "name": "pca9685",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "description": "Generic PCA9685 driver for the BBC micro:bit",
     "license": "MIT",
     "dependencies": {
