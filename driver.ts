@@ -392,34 +392,34 @@ namespace PCA9685 {
      */
     //% block
     export function setServoPositionSlow(servoNum: ServoNum = 1, degrees: number, chipAddress: number = 0x40): void {
-        const chip = getChipConfig(chipAddress);
-        servoNum = Math.max(1, Math.min(16, servoNum));
-        degrees = Math.max(0, Math.min(180, degrees));
-        const servo: ServoConfig = chip.servos[servoNum - 1];
+        const chip = getChipConfig(chipAddress)
+        servoNum = Math.max(1, Math.min(16, servoNum))
+        degrees = Math.max(0, Math.min(180, degrees))
+        const servo: ServoConfig = chip.servos[servoNum - 1]
 
-        const diff = degrees - servo.position;
+        const diff = degrees - servo.position
         if (diff == 0) {
-            return;
+            return
         }
 
-        const center = Math.abs(Math.sqrt(diff));
-        let values: number[] = [];
-        for (let i: number = 1; i < center; i++) {
-            values.push(diff > 0 ? i : -i);
+        const center = Math.abs(Math.sqrt(diff))
+        let values: number[] = []
+        for (let i = 1; i < center; i++) {
+            values.push(diff > 0 ? i : -i)
         }
         for (let i = center; i > 0; i--) {
-            values.push(diff > 0 ? i : -i);
+            values.push(diff > 0 ? i : -i)
         }
 
         for (let idx in values) {
-            let newDegrees: number = servo.position + values[idx];
-            const pwm = degrees180ToPWM(chip.freq, newDegrees, servo.minOffset, servo.maxOffset);
-            setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress);
+            let newDegrees: number = servo.position + values[idx]
+            const pwm = degrees180ToPWM(chip.freq, newDegrees, servo.minOffset, servo.maxOffset)
+            setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress)
         }
 
-        const pwm = degrees180ToPWM(chip.freq, degrees, servo.minOffset, servo.maxOffset);
-        servo.position = degrees;
-        return setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress);
+        const pwm = degrees180ToPWM(chip.freq, degrees, servo.minOffset, servo.maxOffset)
+        servo.position = degrees
+        return setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress)
     }
 
     /**
