@@ -385,6 +385,44 @@ namespace PCA9685 {
     }
 
     /**
+     * Used to move slowly the given servo to the specified degrees (0-180) connected to the PCA9685
+     * @param chipAddress [64-125] The I2C address of your PCA9685; eg: 64
+     * @param servoNum The number (1-16) of the servo to move
+     * @param degrees The degrees (0-180) to move the servo to
+     */
+    //% block
+    export function setServoPositionSlow(servoNum: ServoNum = 1, degrees: number, chipAddress: number = 0x40): void {
+        const chip = getChipConfig(chipAddress);
+        servoNum = Math.max(1, Math.min(16, servoNum));
+        degrees = Math.max(0, Math.min(180, degrees));
+        const servo: ServoConfig = chip.servos[servoNum - 1];
+
+        const diff = degrees - servo.position;
+        if (diff == 0) {
+            return;
+        }
+
+        const center = Math.abs(Math.sqrt(diff));
+        let values: number[] = [];
+        for (let i: number = 1; i < center; i++) {
+            values.push(diff > 0 ? i : -i);
+        }
+        for (let i = center; i > 0; i--) {
+            values.push(diff > 0 ? i : -i);
+        }
+
+        for (let idx in values) {
+            let newDegrees: number = servo.position + values[idx];
+            const pwm = degrees180ToPWM(chip.freq, newDegrees, servo.minOffset, servo.maxOffset);
+            setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress);
+        }
+
+        const pwm = degrees180ToPWM(chip.freq, degrees, servo.minOffset, servo.maxOffset);
+        servo.position = degrees;
+        return setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress);
+    }
+
+    /**
      * Used to set the rotation speed of a continous rotation servo from -100% to 100%
      * @param chipAddress [64-125] The I2C address of your PCA9685; eg: 64
      * @param servoNum The number (1-16) of the servo to move
