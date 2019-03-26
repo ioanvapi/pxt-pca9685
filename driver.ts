@@ -392,53 +392,51 @@ namespace PCA9685 {
      */
     //% block
     export function setServoPositionSlowly(servoNum: ServoNum = 1, degrees: number, chipAddress: number = 0x40): void {
-        const chip = getChipConfig(chipAddress)
-        servoNum = Math.max(1, Math.min(16, servoNum))
-        degrees = Math.max(0, Math.min(180, degrees))
-        const servo: ServoConfig = chip.servos[servoNum - 1]
+        const chip = getChipConfig(chipAddress);
+        servoNum = Math.max(1, Math.min(16, servoNum));
+        degrees = Math.max(0, Math.min(180, degrees));
+        const servo: ServoConfig = chip.servos[servoNum - 1];
 
-        const diff = degrees - servo.position
+        const diff = degrees - servo.position;
         if (diff == 0) {
-            return
+            return;
         }
 
-        const center = Math.abs(Math.sqrt(diff))
-        let values: number[] = []
+        const center = Math.abs(Math.sqrt(diff));
+        let values: number[] = [];
         for (let i = 1; i < center; i++) {
-            values.push(diff > 0 ? i : -i)
+            values.push(diff > 0 ? i : -i);
         }
         for (let i = center; i > 0; i--) {
-            values.push(diff > 0 ? i : -i)
+            values.push(diff > 0 ? i : -i);
         }
-        let sum = sumArray(values)
-        for (let i = 0; i < Math.abs(diff-sum); i++) {
-            values[i] = diff > 0 ? values[i]++ : values[i]--
-        }
-
-
-        for (let idx in values) {
-            let newDegrees: number = servo.position + values[idx]
-            const pwm = degrees180ToPWM(chip.freq, newDegrees, servo.minOffset, servo.maxOffset)
-            debug(`setServoPositionSlowly(${servoNum}, ${newDegrees}, ${chipAddress})`)
-            setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress)
+        let sum = sumArray(values);
+        for (let i = 0; i < Math.abs(diff - sum); i++) {
+            values[i] = diff > 0 ? values[i]++ : values[i]--;
         }
 
-        const pwm = degrees180ToPWM(chip.freq, degrees, servo.minOffset, servo.maxOffset)
-        servo.position = degrees
-        debug(`setServoPositionSlowly(${servoNum}, ${degrees}, ${chipAddress})`)
-        servo.debug()
+        for (let idx = 0; idx < values.length; idx++) {
+            let newDegrees: number = servo.position + values[idx];
+            const pwm = degrees180ToPWM(chip.freq, newDegrees, servo.minOffset, servo.maxOffset);
+            debug(`setServoPositionSlowly(${servoNum}, ${newDegrees}, ${chipAddress})`);
+            setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress);
+        }
 
-        return setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress)
+        const pwm = degrees180ToPWM(chip.freq, degrees, servo.minOffset, servo.maxOffset);
+        servo.position = degrees;
+        debug(`setServoPositionSlowly(${servoNum}, ${degrees}, ${chipAddress})`);
+        servo.debug();
+
+        return setPinPulseRange(servo.pinNumber, 0, pwm, chipAddress);
     }
 
-
-    function sumArray(list: number[]):number {
-        let sum = 0
-        for(let idx in list) {
-            sum += list[idx]
+    function sumArray(list: number[]): number {
+        let sum = 0;
+        for (let idx = 0; idx < list.length; idx++) {
+            sum += list[idx];
         }
 
-        return sum
+        return sum;
     }
 
     /**
