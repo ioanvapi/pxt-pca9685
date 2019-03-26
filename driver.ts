@@ -435,7 +435,7 @@ namespace PCA9685 {
     function sumArray(list: number[]):number {
         let sum = 0
         for(let idx in list) {
-            sum += list[idx];
+            sum += list[idx]
         }
 
         return sum
